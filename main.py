@@ -90,6 +90,21 @@ for department in listofDepartments:
             actualFreq = actualFreq.get_attribute('textContent')
             resultTab = classObj.find_element_by_class_name("ResultTable")
             sections = resultTab.find_elements(By.CSS_SELECTOR,("tr[id*='tr']"))
+            sectionArray = []
+            for section in sections:
+                sectionContent = section.find_elements(By.CSS_SELECTOR,("td[class*='ItemRow']"))
+                newSection = {
+                    "Section" : sectionContent[0].text,
+                    "Days" : sectionContent[1].text,
+                    "Time" : sectionContent[2].text,
+                    "Location" : sectionContent[3].text,
+                    "Instructor" : sectionContent[4].text,
+                    "Final" : sectionContent[5].text,
+                    "Seats" : sectionContent[6].text,
+                    "Enrolled" : sectionContent[7].text,
+                    "Waitlist" : sectionContent[8].text
+                }
+                sectionArray.append(newSection)
             classData = {
                 "Course Number" : courseNumber,
                 "Course Name" : courseName,
@@ -97,14 +112,11 @@ for department in listofDepartments:
                 "Course Description" : actualDesc,
                 "Instruction Type" : actualInstr,
                 "Grade Option" : gradeOption,
-                "Frequency" : actualFreq
+                "Frequency" : actualFreq,
+                "Sections" : sectionArray
             }
             print(classData)
-            firebase.patch("/artsci/{}/{}".format(department,courseNumber),classData)
-            for section in sections:
-                sectionContent = section.find_elements(By.CSS_SELECTOR,("td[class*='ItemRow']"))
-                # for cont in sectionContent:
-                    # print(cont.text)
+            # firebase.patch("/artsci/{}/{}".format(department,courseNumber),classData)
 
 print("end time")            
 done = datetime.now()
