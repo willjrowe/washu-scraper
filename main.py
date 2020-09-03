@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from firebase import firebase
 import sys
 import time
 from datetime import datetime
@@ -10,6 +11,9 @@ now = datetime.now()
 print("Start time")
 print(now)
 args = sys.argv
+
+
+firebase = firebase.FirebaseApplication("https://washu-scrape.firebaseio.com/",None)
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
@@ -46,7 +50,8 @@ for department in listOfDepartmentElements:
     listofDepartments.append(department.text)
 departmentCount=len(listofDepartments)
 for department in listofDepartments:
-    if (department!="All Departments(All)"):
+    if (department=="BIOLOGY AND BIOMEDICAL SCIENCES(L41)"):
+    # if (department!="All Departments(All)"):
         departmentLink = driver.find_element_by_link_text(department)
         departmentLink.click()
         time.sleep(11)
@@ -63,29 +68,43 @@ for department in listofDepartments:
             titleInfo = classObj.find_element_by_tag_name('table')
             topLevel = titleInfo.find_elements(By.CSS_SELECTOR,("a[style*='text-align:left;']"))
             #change this to explicitly define each
-            for topObj in topLevel:
-                print(topObj.text)
+            courseNumber = topLevel[0].text
+            courseName = topLevel[1].text
+            courseUnits = topLevel[2].text
+            # for topObj in topLevel:
+                # print(topObj.text)
             descLevel = classObj.find_element_by_css_selector("div[class*='DivDetail']")
             actualDesc = descLevel.find_element_by_css_selector("a[style='text-align:left;'")
             actualDesc = actualDesc.get_attribute('textContent')
             attribList = descLevel.find_elements_by_css_selector("a[class^='CrsAttr']")
             #similar to topObh
-            for attrib in attribList:
-                print(attrib.get_attribute('textContent'))
+            # for attrib in attribList:
+                # print(attrib.get_attribute('textContent'))
             instrType = descLevel.find_element_by_css_selector("td[style='width:30%;']")
             actualInstr = instrType.find_element_by_tag_name('a')
             actualInstr = actualInstr.get_attribute('textContent')
             gradeOption = descLevel.find_element_by_class_name("GradeOptionLink")
-            print(gradeOption.get_attribute('textContent'))
+            gradeOption = gradeOption.get_attribute('textContent')
             freqType = descLevel.find_element_by_css_selector("td[style='width:44%;vertical-align:top;']")
             actualFreq = freqType.find_element_by_tag_name('a')
-            print(actualFreq.get_attribute('textContent'))
+            actualFreq = actualFreq.get_attribute('textContent')
             resultTab = classObj.find_element_by_class_name("ResultTable")
             sections = resultTab.find_elements(By.CSS_SELECTOR,("tr[id*='tr']"))
+            classData = {
+                "Course Number" : courseNumber,
+                "Course Name" : courseName,
+                "Course Units" : courseUnits,
+                "Course Description" : actualDesc,
+                "Instruction Type" : actualInstr,
+                "Grade Option" : gradeOption,
+                "Frequency" : actualFreq
+            }
+            print(classData)
+            firebase.patch("/artsci/{}/{}".format(department,courseNumber),classData)
             for section in sections:
                 sectionContent = section.find_elements(By.CSS_SELECTOR,("td[class*='ItemRow']"))
-                for cont in sectionContent:
-                    print(cont.text)
+                # for cont in sectionContent:
+                    # print(cont.text)
 
 print("end time")            
 done = datetime.now()
