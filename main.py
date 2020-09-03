@@ -39,43 +39,42 @@ driver.get("https://courses.wustl.edu/Semester/Listing.aspx")
 #     driver.quit()
 # listOfThings = driver.find_elements(By.CSS_SELECTOR,("[crs='131']"))
 departmentTable = driver.find_element_by_id("Body_dlDepartments")
-listOfDepartments = departmentTable.find_elements_by_tag_name("a")
-luvList = []
+listOfDepartmentElements = departmentTable.find_elements_by_tag_name("a")
+listofDepartments = []
 classCount=0
-for ele in listOfDepartments:
-    luvList.append(ele.text)
-departmentCount=len(listOfDepartments)
-for thing in luvList:
-    if (thing!="All Departments(All)"):
-        print(thing)
-        link = driver.find_element_by_link_text(thing)
-        link.click()
-        time.sleep(9)
-        try:
+for department in listOfDepartmentElements:
+    listofDepartments.append(department.text)
+departmentCount=len(listofDepartments)
+for department in listofDepartments:
+    if (department!="All Departments(All)"):
+        departmentLink = driver.find_element_by_link_text(department)
+        departmentLink.click()
+        time.sleep(11)
+        try: #probably dont need this try and could by safe with time sleep only
             element = WebDriverWait(driver,10).until(
             EC.presence_of_element_located((By.ID,"Body_oCourseList_viewSelect"))
             )
         except:
             driver.quit()
-        testObj = driver.find_element_by_id("Body_oCourseList_tabSelect")
         classList = driver.find_elements_by_css_selector("div[class^='Crs']")
         classCount+=len(classList)
-        # testList = testObj.find_elements(By.CSS_SELECTOR,("[style='font-weight: bold; text-align:left;']"))
+        #add department to firebase here
         for classObj in classList:
             titleInfo = classObj.find_element_by_tag_name('table')
-            # titleInfo = classObj.find_element_by_css_selector("[style='margin-top:-10px;']")
             topLevel = titleInfo.find_elements(By.CSS_SELECTOR,("a[style*='text-align:left;']"))
+            #change this to explicitly define each
             for topObj in topLevel:
                 print(topObj.text)
             descLevel = classObj.find_element_by_css_selector("div[class*='DivDetail']")
             actualDesc = descLevel.find_element_by_css_selector("a[style='text-align:left;'")
-            print(actualDesc.get_attribute('textContent'))
+            actualDesc = actualDesc.get_attribute('textContent')
             attribList = descLevel.find_elements_by_css_selector("a[class^='CrsAttr']")
+            #similar to topObh
             for attrib in attribList:
                 print(attrib.get_attribute('textContent'))
             instrType = descLevel.find_element_by_css_selector("td[style='width:30%;']")
             actualInstr = instrType.find_element_by_tag_name('a')
-            print(actualInstr.get_attribute('textContent'))
+            actualInstr = actualInstr.get_attribute('textContent')
             gradeOption = descLevel.find_element_by_class_name("GradeOptionLink")
             print(gradeOption.get_attribute('textContent'))
             freqType = descLevel.find_element_by_css_selector("td[style='width:44%;vertical-align:top;']")
