@@ -1,4 +1,5 @@
 from firebase import firebase
+from firebase_admin import db
 
 firebase = firebase.FirebaseApplication("https://washu-scrape.firebaseio.com/",None)
 
