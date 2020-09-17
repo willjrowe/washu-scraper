@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from firebase import firebase
 import sys
 import time
+import re
 from datetime import datetime
 from datetime import date
 now = datetime.now()
@@ -31,11 +32,21 @@ departmentTable = driver.find_element_by_id("Body_dlDepartments")
 listOfDepartmentElements = departmentTable.find_elements_by_tag_name("a")
 listofDepartments = []
 classCount=0
+# cleanMapNumber = "1002"
+# courseNumber = "L72 Test 1002"
+# mappingData = {
+#     "Course Number" : "L72 Test 1002",
+#     "Course Name" : "Test Course",
+#     "Department" : "uhh swag",
+#     "School Division" : "artsci"
+# }
+# firebase.patch("/mappings/{}/{}/".format(cleanMapNumber,courseNumber),mappingData)
 for department in listOfDepartmentElements:
     listofDepartments.append(department.text)
 departmentCount=len(listofDepartments)
+timeoutVariable = False
 for department in listofDepartments:
-    # if (department=="BIOLOGY AND BIOMEDICAL SCIENCES(L41)"):
+# if (department=="BIOLOGY AND BIOMEDICAL SCIENCES(L41)"):
     if (department!="All Departments(All)"):
         departmentLink = driver.find_element_by_link_text(department)
         departmentLink.click()
@@ -54,6 +65,20 @@ for department in listofDepartments:
             topLevel = titleInfo.find_elements(By.CSS_SELECTOR,("a[style*='text-align:left;']"))
             #change this to explicitly define each
             courseNumber = topLevel[0].text
+            # print(courseNumber)
+            # mapNumber = courseNumber.split()
+            # mapString = mapNumber[len(mapNumber)-1]
+            # cleanMapNumber = re.sub('[A-Za-z]', '', mapString)
+            # print(cleanMapNumber)
+            # courseName = topLevel[1].text
+            # mappingData = {
+            #     "Course Number" : courseNumber,
+            #     "Course Name" : courseName,
+            #     "Department" : department,
+            #     "School Division" : "artsci"
+            # }
+            # print(mappingData)
+            # firebase.patch("/mappings/{}/{}/".format(cleanMapNumber,courseNumber),mappingData)
             courseName = topLevel[1].text
             courseUnits = topLevel[2].text
             courseNote = "None"
@@ -110,6 +135,8 @@ for department in listofDepartments:
                 "Course Attributes": attribData,
                 "Sections" : sectionArray,
                 "Date Updated" : today,
+                "Department" : department,
+                "School Division" : "artsci"
             }
             print(classData)
             firebase.patch("/artsci/{}/{}".format(department,courseNumber),classData)
